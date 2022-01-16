@@ -15,7 +15,7 @@ void parse_line(char* line,char** op1, char** op2, char** format, char** instruc
 		printf("No command was provided in %s\n", line);
 	    return;	
 	}
-
+	
 	operands = strtok(NULL, "\n");
 	if (!operands) {
 		printf("No operands were provided in %s\n", line);
@@ -45,13 +45,27 @@ void parse_line(char* line,char** op1, char** op2, char** format, char** instruc
 
 	
 }
+
+int line_number(char* path) {
+	FILE* fp;
+	int num = 0;
+
+	fp = fopen(path, "r");
 	
-struct CommandList* parse_file(char* path) {
+	for (char c=getc(fp); c != EOF; c=getc(fp)){
+		if (c == '\n') {
+			num++;
+		}
+	}
+	fclose(fp);
+	return num;
+}
+	
+struct Command* parse_file(char* path, int* size) {
 	FILE* fp;
 	char* line = NULL;
-	int len;
 	char *op1, *op2, *format, *instruction;
-	struct CommandList *cl, *current, *prev;
+	struct Command* command_list;
 	size_t u;
 	
 	fp = fopen(path, "r");
@@ -61,48 +75,46 @@ struct CommandList* parse_file(char* path) {
 		return NULL;
 	}	
 	
-	current = malloc(sizeof(struct CommandList));
-	current -> instruction = "start";
-	current -> source = NULL;
-	current -> destination = NULL;
-	current -> format = -1;
-	cl = current;
+	*size = line_number(path);
 
-	do { 
-		prev = current;	
-	    current = malloc(sizeof(struct CommandList));	
-		prev -> next = current;
-		len = getline(&line, &u, fp);
+	command_list = malloc(sizeof(struct Command) * *size);
+
+	for (int i = 0; i < *size; i++) { 
+		getline(&line, &u, fp);
 		parse_line(line, &op1, &op2, &format, &instruction);
+			
+		command_list[i].line = malloc((1 + strlen(line)) * sizeof(char));
+		strcpy(command_list[i].line, line);
 		
 		if (instruction) {
-			current -> instruction = malloc((1 + strlen(instruction)) * sizeof(char));
-			strcpy(current->instruction, instruction);
+			command_list[i].instruction = malloc((1 + strlen(instruction)) * sizeof(char));
+			strcpy(command_list[i].instruction, instruction);
 		}
 		else 
-			current->instruction = NULL;
+			command_list[i].instruction = NULL;
 		
 		if (op1) {
-			current -> source = malloc((1 + strlen(op1)) * sizeof(char));
-			strcpy(current->source, op1);
+			command_list[i].source = malloc((1 + strlen(op1)) * sizeof(char));
+			strcpy(command_list[i].source, op1);
 		}
 		else
-			current -> source = NULL;
+			command_list[i].source = NULL;
 		
 		if (op2) {
-			current -> destination = malloc((1 + strlen(op2)) * sizeof(char));
-			strcpy(current->destination, op2);
+			command_list[i].destination = malloc((1 + strlen(op2)) * sizeof(char));
+			strcpy(command_list[i].destination, op2);
 		}
 		else
-			current -> destination = NULL;
+			command_list[i].destination = NULL;
 	
 		if (format)
-			current -> format = size_of_type(format[0]);
+			command_list[i].format = size_of_type(format[0]);
 		else
-			current -> format = -1;
-		
-	} while (len != -1);
-	prev -> next = NULL;
-	return cl;
+			command_list[i].format = -1;
+	}
+	
+	fclose(fp);
+	
+	return command_list;	
 }   
 

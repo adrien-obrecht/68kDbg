@@ -4,10 +4,10 @@
 #include "utils.h"
 
 void parse_line(char* line, char** op1, char** op2, char** format, char** instruction);
-struct CommandList* parse_file(char* file);
+struct Command* parse_file(char* file, int* size);
 
-struct CommandList {
-	struct CommandList* next;
+struct Command {
+	char* line;
 	char* instruction;
 	int format;
     char* source;
