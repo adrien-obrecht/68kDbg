@@ -1,0 +1,14 @@
+move.w #$0010,d0
+move.w d0,$00000040
+move.w d0,d1
+add.w d1,d1
+add.w d0,d1
+sub.w $00000040,d1
+swap d1
+move.w d0,d1
+move.l #$00000040,a4
+add.w (a4),d1
+move.w d1,(a4)
+exg.l d1,d0
+swap d0
+clr.w d0

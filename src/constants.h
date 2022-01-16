@@ -1,0 +1,19 @@
+#ifndef CONSTANTS_h
+#define CONSTANTS_h
+
+// INNER WORKING CONSTANTS
+
+#define DR_SIZE 8 
+#define AR_SIZE 8
+#define MEM_SIZE 2226
+#define MEM_OFFSET 0
+
+// CUSTOMIZATION CONSTANTS
+
+#define HORIZONTAL_PADDING 20
+#define VERTICAL_PADDING 10
+#define BYTES_PER_MEM_ROW 16
+#define WINDOWS_HEIGHT -1
+#define WINDOWS_WIDTH -1
+
+#endif
