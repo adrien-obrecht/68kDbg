@@ -14,17 +14,20 @@ int main(int argc, char** argv) {
 	GtkWidget *window;
 	struct Compiler comp;
 	struct Operand source, dest;
+	struct Command* cl;
 	int size;
 
 	time_t current_time, former_time = 0;
 	
 	reset_compiler(&comp);
 
+	cl = parse_file("test.s", &size);
+	comp.command_list = cl;
+	comp.command_len = size;
 	window = init_window(comp);
-	
-	struct Command* cl = parse_file("test.s", &size);
 	int i = 0;	
 	while (GTK_IS_WIDGET(window)) {
+		comp.command_pointer = i;
 		current_time = time(NULL);
 		if (current_time - former_time > 0) {
 			update_all(comp, window);
