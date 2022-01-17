@@ -4,7 +4,9 @@
 
 #include "register.h"
 #include "constants.h"
+#include "parser.h"
 #include "utils.h"
+#include "draw.h"
 
 
 GtkWidget* create_dr_box() {
@@ -144,7 +146,46 @@ void on_pause_play_item_clicked(GtkWidget* item, struct Compiler* comp) {
 	}
 }
 
-GtkWidget* create_instruction_box(struct Compiler* comp) {
+void on_new_file_item_clicked(GtkWidget* item) {
+	struct Compiler* comp = g_object_get_data(G_OBJECT(item), "comp");
+	GtkWidget* vbox = g_object_get_data(G_OBJECT(item), "vbox");
+	GtkWidget* parent = g_object_get_data(G_OBJECT(item), "parent");
+	GtkWidget* chooser_window;
+	GtkFileFilter* filter = gtk_file_filter_new();
+	int res, size;
+	
+	chooser_window = gtk_file_chooser_dialog_new("Title", NULL, 
+												GTK_FILE_CHOOSER_ACTION_OPEN, 
+												("_Cancel"), 
+												GTK_RESPONSE_CANCEL, 
+												("_Open"), 
+												GTK_RESPONSE_ACCEPT, 
+												NULL);
+	gtk_file_filter_add_pattern(filter, "*.s");
+	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(chooser_window), filter);
+	res = gtk_dialog_run(GTK_DIALOG(chooser_window));
+	if (res == GTK_RESPONSE_ACCEPT)
+  	{
+    	comp -> file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(chooser_window));
+		comp -> command_list = parse_file(comp -> file, &size);
+		comp -> command_len = size;
+		comp -> command_pointer = 0;
+		gtk_widget_destroy(vbox);
+		vbox = create_instruction_box(comp, parent);
+	   gtk_container_add(GTK_CONTAINER(parent), vbox);	
+  	}
+	gtk_widget_destroy(chooser_window);
+}
+
+void on_reload_item_clicked(GtkWidget* item, struct Compiler* comp) {
+	int size;
+    
+	comp -> command_list = parse_file(comp -> file, &size);
+	comp -> command_len = size;
+	comp -> command_pointer = 0;
+}
+
+GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
 	GtkWidget* ibox;
 	GtkWidget* label;
 	GtkWidget* s_window;
@@ -165,10 +206,15 @@ GtkWidget* create_instruction_box(struct Compiler* comp) {
 	image = gtk_image_new_from_file("src/reload.png");
 	reload_item = gtk_tool_button_new(image,"image");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(reload_item), "Reload file");
+	g_signal_connect(G_OBJECT(reload_item), "clicked", G_CALLBACK(on_reload_item_clicked), comp);	
 
 	image = gtk_image_new_from_file("src/new-page.png");
 	new_file_item = gtk_tool_button_new(image,"image");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(new_file_item), "Load new file");
+	g_object_set_data(G_OBJECT(new_file_item), "vbox", vbox);
+	g_object_set_data(G_OBJECT(new_file_item), "comp", comp);
+	g_object_set_data(G_OBJECT(new_file_item), "parent", parent);
+	g_signal_connect(G_OBJECT(new_file_item), "clicked", G_CALLBACK(on_new_file_item_clicked), NULL);	
 	
 	image = gtk_image_new_from_file("src/play.png");
 	pause_play_item = gtk_tool_button_new(image,"image");
@@ -220,6 +266,11 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler comp) {
 		gtk_label_set_markup(GTK_LABEL(label), buff);
 		list = list->next;
 	}
+
+	while (list != NULL) {
+		gtk_widget_destroy(list->data);
+		list = list->next;
+	}
 }
 
 
@@ -260,14 +311,15 @@ GtkWidget* init_window(struct Compiler* comp) {
 	GtkWidget* i_s_window;
 
 	gtk_init(0, NULL);
+	
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, HORIZONTAL_PADDING);
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	dr_box = create_dr_box();
 	ar_box = create_ar_box();
 	mem_s_window = create_mem_box();
-	i_s_window = create_instruction_box(comp);
+	i_s_window = create_instruction_box(comp, hbox);
 	
-	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, HORIZONTAL_PADDING);
 	gtk_container_add(GTK_CONTAINER(hbox), dr_box);	
 	gtk_container_add(GTK_CONTAINER(hbox), ar_box);
 	gtk_container_add(GTK_CONTAINER(hbox), mem_s_window);

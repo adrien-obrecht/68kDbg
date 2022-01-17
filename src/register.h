@@ -30,6 +30,7 @@ struct Compiler {
 	struct DataRegister data_register;
 	struct Memory memory;
 	struct Command* command_list;
+	char* file;
 	int command_pointer;
 	int command_len;
 	int execution_speed;

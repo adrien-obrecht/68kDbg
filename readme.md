@@ -9,6 +9,5 @@
 **TODO:**
 
 - Syntaxic coloration
-- Load/Reload file
 - CCR implementation / display
 - More instructions

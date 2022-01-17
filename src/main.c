@@ -21,9 +21,10 @@ int main(int argc, char** argv) {
 	
 	reset_compiler(&comp);
 
-	cl = parse_file("test.s", &size);
+	cl = parse_file("move.s", &size);
 	comp.command_list = cl;
 	comp.command_len = size;
+	comp.file = "move.s";
 	comp.command_pointer = 0;
 	comp.execution_speed = 0;
 	window = init_window(&comp);
