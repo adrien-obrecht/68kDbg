@@ -8,12 +8,12 @@
 #include "draw.h"
 #include "commands.h"
 #include "parser.h"
+#include "execute.h"
 
 
 int main(int argc, char** argv) {
 	GtkWidget *window;
 	struct Compiler comp;
-	struct Operand source, dest;
 	struct Command* cl;
 	int size;
 
@@ -24,66 +24,15 @@ int main(int argc, char** argv) {
 	cl = parse_file("test.s", &size);
 	comp.command_list = cl;
 	comp.command_len = size;
-	window = init_window(comp);
-	int i = 0;	
+	comp.command_pointer = 0;
+	comp.execution_speed = 0;
+	window = init_window(&comp);
 	while (GTK_IS_WIDGET(window)) {
-		comp.command_pointer = i;
 		current_time = time(NULL);
 		if (current_time - former_time > 0) {
-			update_all(comp, window);
 			former_time = current_time;
-			if (i < size) {
-				source = val_of_op(&comp, cl[i].source, cl[i].format);
-				dest = val_of_op(&comp, cl[i].destination, cl[i].format);
-			
-				if (strcmp("move", cl[i].instruction) == 0) {
-					printf("move.%d %s %s \n", cl[i].format, cl[i].source, cl[i].destination);
-					move(&comp, cl[i].format, source, dest);
-				}
-
-				else if (strcmp("add", cl[i].instruction) == 0) {
-					printf("add.%d %s %s \n", cl[i].format, cl[i].source, cl[i].destination);
-					add(&comp, cl[i].format, source, dest);
-				}
-			
-				else if (strcmp("sub", cl[i].instruction) == 0) {
-					printf("sub.%d %s %s \n", cl[i].format, cl[i].source, cl[i].destination);
-					sub(&comp, cl[i].format, source, dest);
-				}
-			
-				else if (strcmp("swap", cl[i].instruction) == 0) {
-					if (cl[i].format != -1) {
-						printf("Swap doesn't support custom format\n");
-					}
-					else if (cl[i].destination) {
-						printf("Swap only has one operand\n");
-					}
-					else {
-						printf("swap %s \n", cl[i].source);
-						swap(&comp, source);
-					}
-				}
-				
-				else if (strcmp("exg", cl[i].instruction) == 0) {
-					printf("exg.%d %s %s \n", cl[i].format, cl[i].source, cl[i].destination);
-					exchange(&comp, cl[i].format, source, dest);
-				}
-				
-				else if (strcmp("clr", cl[i].instruction) == 0) {
-					if (cl[i].destination) {
-						printf("Clear only has one operand\n");
-					}
-					else {
-						printf("clr.%d %s\n", cl[i].format, cl[i].source);
-						clear(&comp, cl[i].format, source);
-					}
-				}
-			
-				else {
-					printf("Unknown instruction %s\n", cl[i].instruction);
-				}
-				i++;;
-			}
+			do_one_iteration(&comp);
+			update_all(comp, window);
 		}
 		gtk_widget_show_all(window);
 		gtk_main_iteration_do(FALSE);

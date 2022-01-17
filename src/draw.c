@@ -128,7 +128,23 @@ void update_mem_box(GtkWidget* s_window, struct Memory mem) {
 	}
 }
 
-GtkWidget* create_instruction_box(struct Compiler comp) {
+void on_pause_play_item_clicked(GtkWidget* item, struct Compiler* comp) {
+	GtkWidget* image;
+	if (comp -> execution_speed == 1) {
+		comp -> execution_speed = 0;	
+		image = gtk_image_new_from_file("src/play.png");
+		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(item), image);
+		gtk_widget_set_tooltip_text(GTK_WIDGET(item), "Play");
+	}
+	else {	
+		comp -> execution_speed = 1;	
+		image = gtk_image_new_from_file("src/pause.png");
+		gtk_tool_button_set_icon_widget(GTK_TOOL_BUTTON(item), image);
+		gtk_widget_set_tooltip_text(GTK_WIDGET(item), "Pause");
+	}
+}
+
+GtkWidget* create_instruction_box(struct Compiler* comp) {
 	GtkWidget* ibox;
 	GtkWidget* label;
 	GtkWidget* s_window;
@@ -137,8 +153,7 @@ GtkWidget* create_instruction_box(struct Compiler comp) {
 	GtkWidget* image;
 	GtkToolItem* reload_item;
 	GtkToolItem* new_file_item;
-	GtkToolItem* play_item;
-	GtkToolItem* pause_item;
+	GtkToolItem* pause_play_item;
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, VERTICAL_PADDING);
 
@@ -149,26 +164,26 @@ GtkWidget* create_instruction_box(struct Compiler comp) {
 
 	image = gtk_image_new_from_file("src/reload.png");
 	reload_item = gtk_tool_button_new(image,"image");
-	
+	gtk_widget_set_tooltip_text(GTK_WIDGET(reload_item), "Reload file");
+
 	image = gtk_image_new_from_file("src/new-page.png");
 	new_file_item = gtk_tool_button_new(image,"image");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(new_file_item), "Load new file");
 	
 	image = gtk_image_new_from_file("src/play.png");
-	play_item = gtk_tool_button_new(image,"image");
-	
-	image = gtk_image_new_from_file("src/pause.png");
-	pause_item = gtk_tool_button_new(image,"image");
+	pause_play_item = gtk_tool_button_new(image,"image");
+	gtk_widget_set_tooltip_text(GTK_WIDGET(pause_play_item), "Play");
+	g_signal_connect(G_OBJECT(pause_play_item), "clicked", G_CALLBACK(on_pause_play_item_clicked), comp);	
 
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), reload_item, 1);
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), new_file_item, 2);
-	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), play_item, 3);
-	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), pause_item, 4);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), pause_play_item, 4);
 
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(s_window), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 		
 	ibox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	
-	for (int i = 0; i < comp.command_len; i++) {
+	for (int i = 0; i < comp -> command_len; i++) {
 		label = gtk_label_new("");
 		gtk_label_set_xalign(GTK_LABEL(label), 0);
 		gtk_box_pack_start(GTK_BOX(ibox), label, TRUE, TRUE, 0);
@@ -236,7 +251,7 @@ void update_all(struct Compiler comp, GtkWidget* window) {
 }
 
 
-GtkWidget* init_window(struct Compiler comp) {
+GtkWidget* init_window(struct Compiler* comp) {
 	GtkWidget* window;
 	GtkWidget* hbox; 
 	GtkWidget* dr_box;

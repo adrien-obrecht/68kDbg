@@ -32,6 +32,7 @@ struct Compiler {
 	struct Command* command_list;
 	int command_pointer;
 	int command_len;
+	int execution_speed;
 };
 
 void reset_ar(struct AddressRegister*);

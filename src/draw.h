@@ -6,6 +6,6 @@
 #include "register.h"
 
 
-GtkWidget* init_window(struct Compiler);
-void update_all(struct Compiler, GtkWidget*);
+GtkWidget* init_window(struct Compiler* comp);
+void update_all(struct Compiler comp, GtkWidget* window);
 #endif
