@@ -22,14 +22,14 @@ GtkWidget* create_dr_box() {
 }
 
 
-void update_dr_box(GtkWidget* vbox, struct DataRegister dr) {
+void update_dr_box(GtkWidget* vbox, struct DataRegister* dr) {
 	GList* list = gtk_container_get_children(GTK_CONTAINER(vbox));
 	GtkButton* button;
 	char buff[100];
 	
 	for (int i = 0; i < DR_SIZE; i++) {
 		button = GTK_BUTTON(list->data);
-		sprintf(buff, "Data register %d : %s", i, dr.DR[i]);
+		sprintf(buff, "Data register %d : %s", i, dr -> DR[i]);
 		gtk_button_set_label(button, buff);
 		list = list->next;
 	}
@@ -49,20 +49,20 @@ GtkWidget* create_ar_box() {
 }
 
 
-void update_ar_box(GtkWidget* vbox, struct AddressRegister ar) {
+void update_ar_box(GtkWidget* vbox, struct AddressRegister* ar) {
 	GList* list = gtk_container_get_children(GTK_CONTAINER(vbox));
 	GtkButton* button;
 	char buff[100];
 	
 	for (int i = 0; i < AR_SIZE - 1; i++) {
 		button = GTK_BUTTON(list->data);
-		sprintf(buff, "Address register %d : %s", i, ar.AR[i]);
+		sprintf(buff, "Address register %d : %s", i, ar -> AR[i]);
 		gtk_button_set_label(button, buff);
 		list = list->next;
 	}
 	
 	button = GTK_BUTTON(list->data);
-	sprintf(buff, "Stack pointer : %s", ar.stack_pointer);
+	sprintf(buff, "Stack pointer : %s", ar -> stack_pointer);
 	gtk_button_set_label(button, buff);
 }
 
@@ -109,7 +109,7 @@ GtkWidget* create_mem_box() {
 	return s_window;
 }
 
-void update_mem_box(GtkWidget* s_window, struct Memory mem) {
+void update_mem_box(GtkWidget* s_window, struct Memory* mem) {
 	GtkWidget* bu;
 
 	GtkWidget* mem_box = gtk_bin_get_child(GTK_BIN(gtk_bin_get_child(GTK_BIN(s_window))));
@@ -122,9 +122,14 @@ void update_mem_box(GtkWidget* s_window, struct Memory mem) {
 		for (int j = 0; j < BYTES_PER_MEM_ROW; j++) {
 			if (i / 2 >= MEM_SIZE)
 				return;
-			sprintf(buff, "%c%c", mem.mem[i], mem.mem[i+1]);
+			if (mem -> modified[i/2] == 1) {
+				sprintf(buff, "<span bgcolor='#FF3030'>%c%c</span>", mem -> mem[i], mem -> mem[i+1]);
+				mem -> modified[i/2] = 0;	
+			}
+			else	
+				sprintf(buff, "%c%c", mem -> mem[i], mem -> mem[i+1]);
 			bu = gtk_grid_get_child_at(GTK_GRID(mem_box), j+1, i / 2 / BYTES_PER_MEM_ROW + 1);	
-			gtk_label_set_text(GTK_LABEL(bu), buff);
+			gtk_label_set_markup(GTK_LABEL(bu), buff);
 			i = i + 2;
 		}
 	}
@@ -169,20 +174,26 @@ void on_new_file_item_clicked(GtkWidget* item) {
     	comp -> file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(chooser_window));
 		comp -> command_list = parse_file(comp -> file, &size);
 		comp -> command_len = size;
-		comp -> command_pointer = 0;
+		reset_compiler(comp);
 		gtk_widget_destroy(vbox);
 		vbox = create_instruction_box(comp, parent);
-	   gtk_container_add(GTK_CONTAINER(parent), vbox);	
+	    gtk_container_add(GTK_CONTAINER(parent), vbox);	
   	}
 	gtk_widget_destroy(chooser_window);
 }
 
-void on_reload_item_clicked(GtkWidget* item, struct Compiler* comp) {
+void on_reload_item_clicked(GtkWidget* item) {
+	struct Compiler* comp = g_object_get_data(G_OBJECT(item), "comp");
+	GtkWidget* vbox = g_object_get_data(G_OBJECT(item), "vbox");
+	GtkWidget* parent = g_object_get_data(G_OBJECT(item), "parent");
 	int size;
     
 	comp -> command_list = parse_file(comp -> file, &size);
 	comp -> command_len = size;
-	comp -> command_pointer = 0;
+	reset_compiler(comp);
+	gtk_widget_destroy(vbox);
+	vbox = create_instruction_box(comp, parent);
+	gtk_container_add(GTK_CONTAINER(parent), vbox);	
 }
 
 GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
@@ -196,7 +207,7 @@ GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
 	GtkToolItem* new_file_item;
 	GtkToolItem* pause_play_item;
 
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, VERTICAL_PADDING);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
 	s_window = gtk_scrolled_window_new(NULL, NULL);	
 	
@@ -206,7 +217,10 @@ GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
 	image = gtk_image_new_from_file("src/reload.png");
 	reload_item = gtk_tool_button_new(image,"image");
 	gtk_widget_set_tooltip_text(GTK_WIDGET(reload_item), "Reload file");
-	g_signal_connect(G_OBJECT(reload_item), "clicked", G_CALLBACK(on_reload_item_clicked), comp);	
+	g_object_set_data(G_OBJECT(reload_item), "vbox", vbox);
+	g_object_set_data(G_OBJECT(reload_item), "comp", comp);
+	g_object_set_data(G_OBJECT(reload_item), "parent", parent);
+	g_signal_connect(G_OBJECT(reload_item), "clicked", G_CALLBACK(on_reload_item_clicked), NULL);	
 
 	image = gtk_image_new_from_file("src/new-page.png");
 	new_file_item = gtk_tool_button_new(image,"image");
@@ -232,7 +246,7 @@ GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
 	for (int i = 0; i < comp -> command_len; i++) {
 		label = gtk_label_new("");
 		gtk_label_set_xalign(GTK_LABEL(label), 0);
-		gtk_box_pack_start(GTK_BOX(ibox), label, TRUE, TRUE, 0);
+		gtk_box_pack_start(GTK_BOX(ibox), label, FALSE, TRUE, 0);
 	}
 	
 	gtk_container_add(GTK_CONTAINER(s_window), ibox);
@@ -244,7 +258,7 @@ GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
 }
 
 
-void update_instruction_box(GtkWidget* vbox, struct Compiler comp) {
+void update_instruction_box(GtkWidget* vbox, struct Compiler* comp) {
 	GList* list = gtk_container_get_children(GTK_CONTAINER(vbox));
 
    	list = list -> next;	
@@ -254,14 +268,14 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler comp) {
 	list = gtk_container_get_children(GTK_CONTAINER(ibox));
 	GtkWidget* label;
 	char buff[100];
-
-	
-	for (int i = 0; i < comp.command_len; i++) {
+    
+    	
+	for (int i = 0; i < comp -> command_len; i++) {
 		label = list->data;
-		if (i == comp.command_pointer)
-			sprintf(buff, "<span bgcolor='#00FF004F'>%d. %s</span>", i+1, comp.command_list[i].line);
+		if (i == comp -> command_pointer)
+			sprintf(buff, "<span bgcolor='#00FF004F'><b>%d. %s</b></span>", i+1, comp -> command_list[i].line);
 		else
-			sprintf(buff, "%d. %s", i+1, comp.command_list[i].line);
+			sprintf(buff, "<b>%d. %s</b>", i+1, comp -> command_list[i].line);
 		
 		gtk_label_set_markup(GTK_LABEL(label), buff);
 		list = list->next;
@@ -274,7 +288,7 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler comp) {
 }
 
 
-void update_all(struct Compiler comp, GtkWidget* window) {
+void update_all(struct Compiler* comp, GtkWidget* window) {
 	GList* list;
 	GtkWidget* hbox;
    	GtkWidget* dr_box;
@@ -295,9 +309,9 @@ void update_all(struct Compiler comp, GtkWidget* window) {
 	i_s_window = list->data;
 	
 	
-	update_dr_box(dr_box, comp.data_register);
-	update_ar_box(ar_box, comp.address_register);
-	update_mem_box(mem_s_window, comp.memory);
+	update_dr_box(dr_box, &(comp -> data_register));
+	update_ar_box(ar_box, &(comp -> address_register));
+	update_mem_box(mem_s_window, &(comp -> memory));
 	update_instruction_box(i_s_window, comp);
 }
 

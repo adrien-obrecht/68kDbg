@@ -275,3 +275,9 @@ void write_hex(char* tab, int data, int size) {
 		tab[i] = buff[strlen(buff) - 2 * size + i];
 	}
 };
+
+void write_mem(struct Compiler* comp, int position, int data, int size) {
+	write_hex(&comp->memory.mem[2 * position], data, size);
+	for (int i = 0; i < size; i++)
+		comp->memory.modified[position+i] = 1;
+}

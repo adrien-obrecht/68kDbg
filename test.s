@@ -1,5 +1,5 @@
-move.w #$0012,d0
-move.w d0,$00000040
+move.w #$0010,d0
+move.w d0,$0
 move.w d0,d1
 add.w d1,d1
 add.w d0,d1

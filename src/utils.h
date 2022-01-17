@@ -12,6 +12,7 @@ struct Operand {
 
 int size_of_type(char type);
 void write_hex(char* tab, int data, int size);
+void write_mem(struct Compiler* comp, int position, int data, int size);
 int read_hex(char* tab, int size);
 struct Operand val_of_op(struct Compiler* comp, char* op, int size);
 

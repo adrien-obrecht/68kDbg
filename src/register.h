@@ -22,6 +22,7 @@ struct AddressRegister {
 
 struct Memory {
 	char mem[2 * MEM_SIZE];
+	int modified[MEM_SIZE];
 };
 
 

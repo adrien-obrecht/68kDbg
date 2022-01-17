@@ -49,7 +49,7 @@ void move(struct Compiler* comp, int size, struct Operand source, struct Operand
 			break;
 
 		case MEMORY_ADDR:
-			write_hex(&comp->memory.mem[2 * (dest.value - MEM_OFFSET)], value, size);		
+			write_mem(comp, dest.value - MEM_OFFSET, value, size);		
 			break;
 	}
 }

@@ -19,10 +19,15 @@ void reset_mem(struct Memory* mem) {
 	for (int i = 0; i < sizeof(mem -> mem); i++) {
 		mem->mem[i] = '0';
 	}
+	for (int i = 0; i < MEM_SIZE; i++) {
+		mem->modified[i] = 0;
+	}
 }
 
 void reset_compiler(struct Compiler* comp) {
 	reset_dr(&comp -> data_register);
 	reset_ar(&comp -> address_register);
 	reset_mem(&comp -> memory);
+	comp -> command_pointer = 0;
+	comp -> execution_speed = 0;
 }
