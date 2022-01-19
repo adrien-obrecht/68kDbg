@@ -13,9 +13,19 @@ void do_one_iteration(struct Compiler* comp) {
 	if (comp -> execution_speed != 0 && comp -> command_pointer < comp -> command_len) {
 		
 		cmd = comp -> command_list[comp -> command_pointer];
+		comp -> command_pointer++;
 		
 		if (!cmd.source) {
-			comp -> command_pointer++;
+			return;
+		}
+
+		if (strcmp("\tjmp", cmd.instruction) == 0) {
+			if (cmd.format != -1) {
+				printf("Swap doesn't support custom format\n");
+				return;
+			}
+			printf("jmp %s\n", cmd.source);
+			jmp(comp, cmd.source);
 			return;
 		}
 
@@ -107,6 +117,5 @@ void do_one_iteration(struct Compiler* comp) {
 		else {
 			printf("Unknown instruction %s\n", cmd.instruction);
 		}
-		comp -> command_pointer++;
 	}
 }

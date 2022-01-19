@@ -771,3 +771,13 @@ void bchg(struct Compiler* comp, int size, struct Operand source, struct Operand
 	comp -> ccr_z = 1 - former_bit;
 }
 
+void jmp(struct Compiler* comp, char* label) {
+	int p = find_label(comp, label);
+
+	if (p == -1) {
+		printf("Can't find label %s\n", label);
+		return;
+	}
+
+	comp -> command_pointer = p + 1;
+}

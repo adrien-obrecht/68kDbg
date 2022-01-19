@@ -301,3 +301,18 @@ void write_ar(struct Compiler* comp, int position, int data, int size) {
 void write_dr(struct Compiler* comp, int position, int data, int size) {
 	write_hex(&(comp -> data_register.DR[position][8 - 2 * size]), data, size);
 }
+
+int find_label(struct Compiler* comp, char* label) {
+	char* l;
+
+	l = malloc(sizeof(char) * strlen(label + 2));
+	sprintf(l, "%s:\n", label);
+	for (int i = 0; i < comp -> command_len; i++) {
+		if (strcmp(comp -> command_list[i].instruction, l) == 0) {
+			free(l);
+			return i;
+		}	
+	}	
+	free(l);
+	return -1;
+}

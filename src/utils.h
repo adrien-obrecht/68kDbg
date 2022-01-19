@@ -20,5 +20,6 @@ int read_dr(struct Compiler* comp, int position, int size);
 int read_ar(struct Compiler* comp, int position, int size); 
 int read_hex(char* tab, int size);
 struct Operand val_of_op(struct Compiler* comp, char* op, int size);
+int find_label(struct Compiler* comp, char* label); 
 
 #endif

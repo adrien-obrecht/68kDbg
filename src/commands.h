@@ -17,6 +17,7 @@ void xor(struct Compiler* comp, int size, struct Operand source, struct Operand 
 void bset(struct Compiler* comp, int size, struct Operand source, struct Operand dest); 
 void bclr(struct Compiler* comp, int size, struct Operand source, struct Operand dest); 
 void bchg(struct Compiler* comp, int size, struct Operand source, struct Operand dest); 
+void jmp(struct Compiler* comp, char* label); 
 
 #endif
 
