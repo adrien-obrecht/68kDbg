@@ -253,7 +253,7 @@ GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
 
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), reload_item, 1);
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), new_file_item, 2);
-	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), pause_play_item, 4);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), pause_play_item, 3);
 
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(s_window), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 		

@@ -13,18 +13,20 @@ void parse_line(char* line,char** op1, char** op2, char** format, char** instruc
 	command = strtok(cpy, " ");
 	if (!command) {
 		printf("No command was provided in %s\n", line);
+		free(cpy);
 	    return;	
 	}
 	
 	operands = strtok(NULL, "\n");
 	if (!operands) {
-		printf("No operands were provided in %s\n", line);
+		free(cpy);
 		return;
 	}
 	
 	*instruction = strtok(command, ".");
 	if (!instruction) {
 		printf("No instruction was provided in %s\n", line);
+		free(cpy);
 	    return;	
 	}
 
@@ -33,6 +35,7 @@ void parse_line(char* line,char** op1, char** op2, char** format, char** instruc
 	*op1 = strtok(operands, ",");
 	if (!op1) {
 		printf("No operand was provided in %s\n", line);
+		free(cpy);
 	    return;	
 	}
 
@@ -40,6 +43,7 @@ void parse_line(char* line,char** op1, char** op2, char** format, char** instruc
 	
 	if (*format && strlen(*format) != 1) {
 		printf("Format %s is unknown \n", *format);
+		free(cpy);
 		return;
 	}	
 

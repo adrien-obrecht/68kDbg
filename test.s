@@ -1,15 +1,11 @@
-move.l #$FE800174,d0
-not.b d0
-move.w d0,$00000040
-meove.w d0,d1
-add.w d1,d1
-add.w d0,d1
-sub.w $00000040,d1
-swap d1
-move.w d0,d1
-move.l #$00000040,a4
-add.w (a4),d1
-move.w d1,(a4)
-exg.l d1,d0
-swap d0
-clr.w d0
+main:
+	move.b #$24,d0
+	bclr.l #$02,d0
+	or.b #$03,d0
+	move.b #$F8,d1
+	and.b d0,d1
+	not.w d1
+	xor.w #$FF00
+	move.b d1,$22
+	bset.b #$05,$22
+	bchg.b #$01,$22
