@@ -7,8 +7,11 @@
 #include "register.h"
 #include "utils.h"
 
+// All the instructions here are implemented according to the M68k reference manual which can be found here:
+// https://www.nxp.com/docs/en/reference-manual/M68000PRM.pdf
 
 void move(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Moves <source> data to <dest>
 	int value;
 	
 	if (size == -1) {
@@ -68,6 +71,7 @@ void move(struct Compiler* comp, int size, struct Operand source, struct Operand
 
 
 void add(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Adds <source> to <dest>
 	int value;
 	
 	if (size == -1) {
@@ -131,6 +135,7 @@ void add(struct Compiler* comp, int size, struct Operand source, struct Operand 
 
 
 void sub(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Substracts <source> from <dest>
 	int value;
 	
 	if (size == -1) {
@@ -194,6 +199,7 @@ void sub(struct Compiler* comp, int size, struct Operand source, struct Operand 
 
 
 void swap(struct Compiler* comp, struct Operand source) {
+	// Swaps the opper 16 and lower 16 bits of <source>
 	int l_16, u_16;
 	
 	switch (source.type) {
@@ -231,6 +237,7 @@ void swap(struct Compiler* comp, struct Operand source) {
 }
 
 void exchange(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Exchange <source> and <dest> values
 	int value1, value2;
 	
 	if (size == -1) {
@@ -289,6 +296,7 @@ void exchange(struct Compiler* comp, int size, struct Operand source, struct Ope
 }
 
 void clear(struct Compiler* comp, int size, struct Operand source) {
+	// Clears <source> value
 	if (size == -1) {
 		printf("Clear missing a format specifier\n");
 		return;
@@ -317,6 +325,7 @@ void clear(struct Compiler* comp, int size, struct Operand source) {
 }
 
 void not(struct Compiler* comp, int size, struct Operand source) {
+	// Performs a bitwise not to <source>
 	int value;
 	int xor_value;
 
@@ -372,6 +381,7 @@ void not(struct Compiler* comp, int size, struct Operand source) {
 }
 
 void and(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Performs a bitwise and between <source> and <dest>
 	int value;
 	
 	if (size == -1) {
@@ -437,6 +447,7 @@ void and(struct Compiler* comp, int size, struct Operand source, struct Operand 
 
 
 void or(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Performs a bitwise or between <source> and <dest> 
 	int value;
 	
 	if (size == -1) {
@@ -502,6 +513,7 @@ void or(struct Compiler* comp, int size, struct Operand source, struct Operand d
 
 
 void xor(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Performs a bitwise xor between <source> and <dest>
 	int value;
 	
 	if (size == -1) {
@@ -567,6 +579,7 @@ void xor(struct Compiler* comp, int size, struct Operand source, struct Operand 
 
 
 void bset(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Sets bit <source> of <dest> to 1
 	int value1, value2;
 	int former_bit;
 	
@@ -636,6 +649,7 @@ void bset(struct Compiler* comp, int size, struct Operand source, struct Operand
 
 
 void bclr(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Sets bit <source> of <dest> to 0
 	int value1, value2;
 	int former_bit;
 	
@@ -704,6 +718,7 @@ void bclr(struct Compiler* comp, int size, struct Operand source, struct Operand
 }
 
 void bchg(struct Compiler* comp, int size, struct Operand source, struct Operand dest) {
+	// Does a not to bit <source> of <dest>
 	int value1, value2;
 	int former_bit;
 	
@@ -772,6 +787,7 @@ void bchg(struct Compiler* comp, int size, struct Operand source, struct Operand
 }
 
 void jmp(struct Compiler* comp, char* label) {
+	// Jumps to the label <label> in the instruction list
 	int p = find_label(comp, label);
 
 	if (p == -1) {

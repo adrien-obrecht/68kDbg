@@ -8,6 +8,7 @@
 #include "utils.h"
 
 int hex_to_int(char c) {
+	// Converts an hex char to it's decimal value
 	if (c <= '9' && c >= '0')
 		return c-'0';
 	switch (c) {
@@ -24,18 +25,20 @@ int hex_to_int(char c) {
 		case 'F': case 'f':
 			return 15;
 	}
-	printf("Error reading from memory : %c isn't a valid hexadecimal character\n", c);
+	printf("Error converting : %c isn't a valid hexadecimal character\n", c);
 	return -1;
 }
 
 int dec_to_int(char c) {
+	// Converts a decimal char to it's value 
 	if (c <= '9' && c >= '0')
 		return c-'0';
-	printf("Error reading from memory : %c isn't a valid decimal character\n", c);
+	printf("Error converting : %c isn't a valid decimal character\n", c);
 	return -1;
 }
 
 int bin_to_int(char c) {
+	// Converts a binary char to it's value
 	if (c <= '1' && c >= '0')
 		return c-'0';
 	printf("Error reading from memory : %c isn't a valid binary character\n", c);
@@ -43,6 +46,8 @@ int bin_to_int(char c) {
 }
 
 struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
+	//  Parses an operand and returns the corresponding Operand object. Can return INVALID operand in case of failure
+	
 	struct Operand operand;
 	operand.value = 0;
 	operand.type = MEMORY_ADDR;
@@ -56,9 +61,11 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 	int increase = 0;
 	char format = 'd';
 
+	// Iter through the string, keeping track of what type the operand can be
 	while (op[pos] != '\0') {
 		switch (op[pos]) {
 			case '#' :
+				// Specific for a raw number
 				if (saw_number || saw_format || saw_type) {
 					printf("Error in op format : didn't expect # here\n");
 					goto EXIT_ERROR;
@@ -68,6 +75,7 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 				break;
 
 			case '$':
+				// Hexadecimal token
 				if (saw_format || saw_number) {
 					printf("Error in op format : didn't expect $ here\n");
 					goto EXIT_ERROR;
@@ -77,6 +85,7 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 				break;
 
 			case '%':
+				// Binary token
 				if (saw_format || saw_number) {
 					printf("Error in op format : didn't expect %% here\n");
 					goto EXIT_ERROR;
@@ -86,6 +95,7 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 				break;
 			
 			case 'd':
+				// Means it's a data register
 				if (format == 'x') {
 					value = hex_to_int(op[pos]);
 					if (value == -1)
@@ -103,6 +113,7 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 				break;
 
 			case 'a':
+				// Means it's an address register
 				if (format == 'x') {
 					value = hex_to_int(op[pos]);
 					if (value == -1)
@@ -120,6 +131,7 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 				break;
 
 			case '-':
+				// Case of -(ai) where we decrease the address register BEFORE
 				if (operand.type != MEMORY_ADDR) {
 					printf("Error in op format, didn't expect %c here\n", op[pos+1]);
 					goto EXIT_ERROR;
@@ -128,6 +140,8 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 				pos++;
 				
 			case '(':
+				// Pointer to memory from address register
+				// Here we do an ugly case by case to fistinguish (ai), (ai)+ and -(ai)
 				if (operand.type != MEMORY_ADDR) {
 					printf("Error in op format, didn't expect %c here\n", op[pos+1]);
 					goto EXIT_ERROR;
@@ -181,6 +195,7 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 				break;
 
 			default:
+				// It can only be a number now
 				saw_number = true;
 				switch (format) {
 					case 'x':
@@ -206,6 +221,8 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 		pos++;
 	}
 	
+	// Now we check if what we found is coherent (checks for out of bound)
+
 	switch (operand.type) {
 		case MEMORY_ADDR:
 			if (operand.value < MEM_OFFSET || operand.value + 4 > MEM_OFFSET + MEM_SIZE) {
@@ -236,12 +253,14 @@ struct Operand val_of_op(struct Compiler* comp, char* op, int size) {
 
 
 	EXIT_ERROR:
+		// Whenever we fail parsing, we can fallback to this label and exit safely
 		operand.type = INVALID;
 		return operand;	
 }	
 
 
 int size_of_type(char type) {
+	// Converts the type (byte, word and long) to it's corresponding byte length
 	switch (type) {
 		case('b'):
 			return 1;
@@ -255,6 +274,7 @@ int size_of_type(char type) {
 }
 
 int read_hex(char* tab, int size) {
+	// Reads <size> bytes of data from <tab>, converting it from hex
 	int r = 0, num;
 	for (int i = 0; i < 2 * size; i++) {
 		num = hex_to_int(tab[i]);
@@ -266,18 +286,22 @@ int read_hex(char* tab, int size) {
 }
 
 int read_mem(struct Compiler* comp, int position, int size) {
+	// Reads <size> bytes at <psoition> of <comp>
 	return read_hex(&(comp -> memory.mem[2 * (position - MEM_OFFSET)]), size);
 }
 
 int read_dr(struct Compiler* comp, int position, int size) {
+	// Reads <size> bytes of <domp> data register number <position>
 	return read_hex(&(comp -> data_register.DR[position][8 - 2 * size]), size);	
 }
 
 int read_ar(struct Compiler* comp, int position, int size) {
+	// Reads <size> bytes of <domp> address register number <position>
 	return read_hex(&(comp -> address_register.AR[position][8 - 2 * size]), size);	
 }
 
 void write_hex(char* tab, int data, int size) {
+	// Writes <size> bytes of <data> to <tab>, in hex format
 	char buff[1000]; 
 	char bbuff[100];
 
@@ -289,20 +313,24 @@ void write_hex(char* tab, int data, int size) {
 };
 
 void write_mem(struct Compiler* comp, int position, int data, int size) {
+	// Writes <size> bytes of <data> at <position> in the memory
 	write_hex(&comp->memory.mem[2 * (position - MEM_OFFSET)], data, size);
 	for (int i = 0; i < size; i++)
-		comp->memory.modified[position+i] = 1;
+		comp->memory.modified[position+i] = 1; // We mark the modified regions to highlight them in gui
 }
 
 void write_ar(struct Compiler* comp, int position, int data, int size) {
+	// Writes <size> bytes of <data> in the address register <position>
 	write_hex(&(comp -> address_register.AR[position][8 - 2 * size]), data, size);
 }
 
 void write_dr(struct Compiler* comp, int position, int data, int size) {
+	// Writes <size> bytes of <data> in the data register <position>
 	write_hex(&(comp -> data_register.DR[position][8 - 2 * size]), data, size);
 }
 
 int find_label(struct Compiler* comp, char* label) {
+	// Finds the position of the label <label> in the instruction list. Returns -1 if it doesn't exist
 	char* l;
 
 	l = malloc(sizeof(char) * strlen(label + 2));

@@ -6,10 +6,12 @@
 #include "commands.h"
 
 void do_one_iteration(struct Compiler* comp) {
+	// Executes one instruction in the instruction list, as pointed by the instruction pointer
 	
 	struct Command cmd;
 	struct Operand source, dest;
 	
+	// Verify that program isn't stopped
 	if (comp -> execution_speed != 0 && comp -> command_pointer < comp -> command_len) {
 		
 		cmd = comp -> command_list[comp -> command_pointer];
@@ -18,6 +20,8 @@ void do_one_iteration(struct Compiler* comp) {
 		if (!cmd.source) {
 			return;
 		}
+
+		// From here we simply compare the instruction to the known instructions and redirect the instruction accordingly
 
 		if (strcmp("\tjmp", cmd.instruction) == 0) {
 			if (cmd.format != -1) {

@@ -42,9 +42,6 @@ struct Compiler {
 	int ccr_c;
 };
 
-void reset_ar(struct AddressRegister*);
-void reset_dr(struct DataRegister*);
-void reset_mem(struct Memory*);
 void reset_compiler(struct Compiler*);
 
 #endif

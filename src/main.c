@@ -19,14 +19,18 @@ int main(int argc, char** argv) {
 
 	time_t current_time, former_time = 0;
 	
-	reset_compiler(&comp);
+	// This main function runs the main loop which keeps the Dbg windows open
 
-	cl = parse_file("test.s", &size);
+	// Initialise variables
+	reset_compiler(&comp);
+	cl = parse_file("", &size);
 	comp.command_list = cl;
 	comp.command_len = size;
-	comp.file = "test.s";
+	comp.file = "";
 	window = init_window(&comp);
+
 	while (GTK_IS_WIDGET(window)) {
+		// Runs an iteration each second while giving time to render
 		current_time = time(NULL);
 		if (current_time - former_time > 0) {
 			former_time = current_time;

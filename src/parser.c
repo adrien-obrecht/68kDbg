@@ -5,6 +5,10 @@
 #include "parser.h"
 
 void parse_line(char* line,char** op1, char** op2, char** format, char** instruction) {
+	// Parses a line of assembly code, using strtok to separate command, operand and format specifier
+	// A normal line looks like:
+	// instruction.format operand1, operand2
+	// But format can be unspecified and both operands can be missing
 	char* command;
     char* operands;
 	char* cpy = malloc(sizeof(char) * (strlen(line) + 1));
@@ -49,6 +53,7 @@ void parse_line(char* line,char** op1, char** op2, char** format, char** instruc
 }
 
 int line_number(char* path) {
+	// Counts the number of line of the file, to allocate enough memory for it
 	FILE* fp;
 	int num = 0;
 
@@ -64,6 +69,7 @@ int line_number(char* path) {
 }
 	
 struct Command* parse_file(char* path, int* size) {
+	// Parses the whole file and returns the corresponding allocated command list
 	FILE* fp;
 	char* line = NULL;
 	char *op1 = NULL, *op2 = NULL, *format = NULL, *instruction = NULL;
@@ -81,6 +87,7 @@ struct Command* parse_file(char* path, int* size) {
 	command_list = malloc(sizeof(struct Command) * *size);
 
 	for (int i = 0; i < *size; i++) { 
+		// For each line, we parse it and copy the data to the command list
 		getline(&line, &u, fp);
 		parse_line(line, &op1, &op2, &format, &instruction);
 			

@@ -10,6 +10,7 @@
 
 
 GtkWidget* create_dr_box() {
+	// Initialises the box to display the data registers (vertical box made of buttons)
 	GtkWidget* vbox;
 	GtkWidget* button;
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, VERTICAL_PADDING);
@@ -23,6 +24,7 @@ GtkWidget* create_dr_box() {
 
 
 void update_dr_box(GtkWidget* vbox, struct DataRegister* dr) {
+	// Runtime update of the labels to match data registers
 	GList* list = gtk_container_get_children(GTK_CONTAINER(vbox));
 	GtkButton* button;
 	char buff[100];
@@ -37,6 +39,7 @@ void update_dr_box(GtkWidget* vbox, struct DataRegister* dr) {
 
 
 GtkWidget* create_ar_box() {
+	// Initialises the box to display the address registers (vertical box made of buttons)
 	GtkWidget* vbox;
 	GtkWidget* button;
 	GtkWidget* label;
@@ -48,6 +51,7 @@ GtkWidget* create_ar_box() {
 	}
 	
 	label = gtk_label_new("");
+	// This is a place for the CCR
 	gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, VERTICAL_PADDING);
 
 	return vbox;
@@ -55,6 +59,7 @@ GtkWidget* create_ar_box() {
 
 
 void update_ar_box(GtkWidget* vbox, struct Compiler* comp) {
+	// Runtime update of the labels to match address registers
 	GList* list = gtk_container_get_children(GTK_CONTAINER(vbox));
 	GtkButton* button;
 	GtkWidget* label;
@@ -73,6 +78,7 @@ void update_ar_box(GtkWidget* vbox, struct Compiler* comp) {
 	list = list->next;
 		
 	label = list->data;
+	// Also update CCR
 	sprintf(buff, "<b>          X  N  Z  V  C\nCCR: %d  %d  %d  %d  %d</b>", 
 			comp -> ccr_x, 
 			comp -> ccr_n, 
@@ -83,6 +89,7 @@ void update_ar_box(GtkWidget* vbox, struct Compiler* comp) {
 }
 
 GtkWidget* create_mem_box() {
+	// Initialises the grid that will hold memory information
 	GtkWidget* mem;
 	GtkWidget* bu;
 	GtkWidget* s_window;
@@ -92,9 +99,12 @@ GtkWidget* create_mem_box() {
 	s_window = gtk_scrolled_window_new(NULL, NULL);	
 	
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(s_window), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	// Use a scrolled window to display as much memory as we want
 		
 	mem = gtk_grid_new();
 	gtk_grid_set_column_spacing(GTK_GRID(mem), VERTICAL_PADDING);
+	
+	// First raw / column display the position info in the memory
 	
 	for (i = 0; i < BYTES_PER_MEM_ROW; i++) {
 		sprintf(buff, "%X", i);
@@ -126,6 +136,7 @@ GtkWidget* create_mem_box() {
 }
 
 void update_mem_box(GtkWidget* s_window, struct Memory* mem) {
+	// Runtime update of the memory information
 	GtkWidget* bu;
 
 	GtkWidget* mem_box = gtk_bin_get_child(GTK_BIN(gtk_bin_get_child(GTK_BIN(s_window))));
@@ -152,6 +163,8 @@ void update_mem_box(GtkWidget* s_window, struct Memory* mem) {
 }
 
 void on_pause_play_item_clicked(GtkWidget* item, struct Compiler* comp) {
+	// Callback funtion called when pause/play is clicked
+	// Changes speed/display of the button
 	GtkWidget* image;
 	if (comp -> execution_speed == 1) {
 		comp -> execution_speed = 0;	
@@ -168,6 +181,9 @@ void on_pause_play_item_clicked(GtkWidget* item, struct Compiler* comp) {
 }
 
 void on_new_file_item_clicked(GtkWidget* item) {
+	// Callback funtion called when new file is clicked
+	// Creates a file chooser windows which will ask for a .s file and load it into memory
+	//
 	struct Compiler* comp = g_object_get_data(G_OBJECT(item), "comp");
 	GtkWidget* vbox = g_object_get_data(G_OBJECT(item), "vbox");
 	GtkWidget* parent = g_object_get_data(G_OBJECT(item), "parent");
@@ -182,11 +198,13 @@ void on_new_file_item_clicked(GtkWidget* item) {
 												("_Open"), 
 												GTK_RESPONSE_ACCEPT, 
 												NULL);
+	// Select only assembly file (.s)
 	gtk_file_filter_add_pattern(filter, "*.s");
 	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(chooser_window), filter);
 	res = gtk_dialog_run(GTK_DIALOG(chooser_window));
 	if (res == GTK_RESPONSE_ACCEPT)
   	{
+		// If user decides to persue change, we destroy old command list and build a new one
     	comp -> file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(chooser_window));
 		comp -> command_list = parse_file(comp -> file, &size);
 		comp -> command_len = size;
@@ -199,6 +217,8 @@ void on_new_file_item_clicked(GtkWidget* item) {
 }
 
 void on_reload_item_clicked(GtkWidget* item) {
+	// Callback function called when reload is clicked
+	// Fetches back the data from loaded file, reloading the instruction list
 	struct Compiler* comp = g_object_get_data(G_OBJECT(item), "comp");
 	GtkWidget* vbox = g_object_get_data(G_OBJECT(item), "vbox");
 	GtkWidget* parent = g_object_get_data(G_OBJECT(item), "parent");
@@ -213,6 +233,7 @@ void on_reload_item_clicked(GtkWidget* item) {
 }
 
 GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
+	// Initialises the box displaying the instructions / the widget to load reload and play
 	GtkWidget* ibox;
 	GtkWidget* label;
 	GtkWidget* s_window;
@@ -275,6 +296,7 @@ GtkWidget* create_instruction_box(struct Compiler* comp, GtkWidget* parent) {
 
 
 void update_instruction_box(GtkWidget* vbox, struct Compiler* comp) {
+	// Update the instruction box, highlighting where the current instruction pointer is
 	GList* list = gtk_container_get_children(GTK_CONTAINER(vbox));
 
    	list = list -> next;	
@@ -290,6 +312,7 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler* comp) {
 	for (int i = 0; i < comp -> command_len; i++) {
 		label = list->data;
 				
+		// Markup is used for basic syntax highlighting
 		sprintf(instruction, "<span color='#7000FF'>%s</span>", comp -> command_list[i].instruction);
 
 		switch (comp -> command_list[i].format) {
@@ -326,6 +349,7 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler* comp) {
 	}
 
 	while (list != NULL) {
+		// Clean the memory by destroying 'unreachable' blocks of data (from file reloading)
 		gtk_widget_destroy(list->data);
 		list = list->next;
 	}
@@ -333,6 +357,7 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler* comp) {
 
 
 void update_all(struct Compiler* comp, GtkWidget* window) {
+	// Redirects all the updates to the correct components of the gui
 	GList* list;
 	GtkWidget* hbox;
    	GtkWidget* dr_box;
@@ -361,6 +386,7 @@ void update_all(struct Compiler* comp, GtkWidget* window) {
 
 
 GtkWidget* init_window(struct Compiler* comp) {
+	// Initialises the whole gui, creating the window and object ordering
 	GtkWidget* window;
 	GtkWidget* hbox; 
 	GtkWidget* dr_box;
