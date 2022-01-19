@@ -265,6 +265,18 @@ int read_hex(char* tab, int size) {
 	return r;
 }
 
+int read_mem(struct Compiler* comp, int position, int size) {
+	return read_hex(&(comp -> memory.mem[2 * (position - MEM_OFFSET)]), size);
+}
+
+int read_dr(struct Compiler* comp, int position, int size) {
+	return read_hex(&(comp -> data_register.DR[position][8 - 2 * size]), size);	
+}
+
+int read_ar(struct Compiler* comp, int position, int size) {
+	return read_hex(&(comp -> address_register.AR[position][8 - 2 * size]), size);	
+}
+
 void write_hex(char* tab, int data, int size) {
 	char buff[1000]; 
 	char bbuff[100];
@@ -277,7 +289,15 @@ void write_hex(char* tab, int data, int size) {
 };
 
 void write_mem(struct Compiler* comp, int position, int data, int size) {
-	write_hex(&comp->memory.mem[2 * position], data, size);
+	write_hex(&comp->memory.mem[2 * (position - MEM_OFFSET)], data, size);
 	for (int i = 0; i < size; i++)
 		comp->memory.modified[position+i] = 1;
+}
+
+void write_ar(struct Compiler* comp, int position, int data, int size) {
+	write_hex(&(comp -> address_register.AR[position][8 - 2 * size]), data, size);
+}
+
+void write_dr(struct Compiler* comp, int position, int data, int size) {
+	write_hex(&(comp -> data_register.DR[position][8 - 2 * size]), data, size);
 }

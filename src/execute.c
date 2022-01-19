@@ -57,7 +57,17 @@ void do_one_iteration(struct Compiler* comp) {
 				clear(comp, cmd.format, source);
 			}
 		}
-			
+		
+		else if (strcmp("not", cmd.instruction) == 0) {
+			if (cmd.destination) {
+				printf("Not only has one operand\n");
+			}
+			else {
+				printf("not.%d %s\n", cmd.format, cmd.source);
+				not(comp, cmd.format, source);
+			}
+		}
+
 		else {
 			printf("Unknown instruction %s\n", cmd.instruction);
 		}

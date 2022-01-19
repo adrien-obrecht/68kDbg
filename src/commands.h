@@ -10,6 +10,7 @@ void sub(struct Compiler* comp, int size, struct Operand source, struct Operand 
 void swap(struct Compiler* comp, struct Operand source);
 void exchange(struct Compiler* comp, int size, struct Operand source, struct Operand dest);
 void clear(struct Compiler* comp, int size, struct Operand source);
+void not(struct Compiler* comp, int size, struct Operand source);
 
 #endif
 

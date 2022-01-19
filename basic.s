@@ -1,7 +1,6 @@
-move.l #$FE800174,d0
-not.b d0
+move.w #$0010,d0
 move.w d0,$00000040
-meove.w d0,d1
+move.w d0,d1
 add.w d1,d1
 add.w d0,d1
 sub.w $00000040,d1

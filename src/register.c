@@ -30,4 +30,9 @@ void reset_compiler(struct Compiler* comp) {
 	reset_mem(&comp -> memory);
 	comp -> command_pointer = 0;
 	comp -> execution_speed = 0;
+	comp -> ccr_x = 0;
+	comp -> ccr_n = 0;
+	comp -> ccr_z = 0;
+	comp -> ccr_v = 0;
+	comp -> ccr_c = 0;
 }

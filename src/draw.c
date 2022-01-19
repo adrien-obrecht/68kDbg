@@ -39,31 +39,47 @@ void update_dr_box(GtkWidget* vbox, struct DataRegister* dr) {
 GtkWidget* create_ar_box() {
 	GtkWidget* vbox;
 	GtkWidget* button;
+	GtkWidget* label;
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, VERTICAL_PADDING);
 	
 	for (int i = 0; i < AR_SIZE; i++) {
 		button = gtk_button_new();
 		gtk_box_pack_start(GTK_BOX(vbox), button, TRUE, TRUE, VERTICAL_PADDING);
 	}
+	
+	label = gtk_label_new("");
+	gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, VERTICAL_PADDING);
+
 	return vbox;
 }
 
 
-void update_ar_box(GtkWidget* vbox, struct AddressRegister* ar) {
+void update_ar_box(GtkWidget* vbox, struct Compiler* comp) {
 	GList* list = gtk_container_get_children(GTK_CONTAINER(vbox));
 	GtkButton* button;
+	GtkWidget* label;
 	char buff[100];
 	
 	for (int i = 0; i < AR_SIZE - 1; i++) {
 		button = GTK_BUTTON(list->data);
-		sprintf(buff, "Address register %d : %s", i, ar -> AR[i]);
+		sprintf(buff, "Address register %d : %s", i, comp -> address_register.AR[i]);
 		gtk_button_set_label(button, buff);
 		list = list->next;
 	}
 	
 	button = GTK_BUTTON(list->data);
-	sprintf(buff, "Stack pointer : %s", ar -> stack_pointer);
+	sprintf(buff, "Stack pointer : %s", comp -> address_register.stack_pointer);
 	gtk_button_set_label(button, buff);
+	list = list->next;
+		
+	label = list->data;
+	sprintf(buff, "<b>          X  N  Z  V  C\nCCR: %d  %d  %d  %d  %d</b>", 
+			comp -> ccr_x, 
+			comp -> ccr_n, 
+			comp -> ccr_z, 
+			comp -> ccr_v, 
+			comp -> ccr_c);
+	gtk_label_set_markup(GTK_LABEL(label), buff);
 }
 
 GtkWidget* create_mem_box() {
@@ -272,7 +288,7 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler* comp) {
     	
 	for (int i = 0; i < comp -> command_len; i++) {
 		label = list->data;
-		if (i == comp -> command_pointer)
+		if (i == comp -> command_pointer - 1)
 			sprintf(buff, "<span bgcolor='#00FF004F'><b>%d. %s</b></span>", i+1, comp -> command_list[i].line);
 		else
 			sprintf(buff, "<b>%d. %s</b>", i+1, comp -> command_list[i].line);
@@ -310,7 +326,7 @@ void update_all(struct Compiler* comp, GtkWidget* window) {
 	
 	
 	update_dr_box(dr_box, &(comp -> data_register));
-	update_ar_box(ar_box, &(comp -> address_register));
+	update_ar_box(ar_box, comp);
 	update_mem_box(mem_s_window, &(comp -> memory));
 	update_instruction_box(i_s_window, comp);
 }

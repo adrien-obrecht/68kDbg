@@ -21,10 +21,10 @@ int main(int argc, char** argv) {
 	
 	reset_compiler(&comp);
 
-	cl = parse_file("move.s", &size);
+	cl = parse_file("test.s", &size);
 	comp.command_list = cl;
 	comp.command_len = size;
-	comp.file = "move.s";
+	comp.file = "test.s";
 	window = init_window(&comp);
 	while (GTK_IS_WIDGET(window)) {
 		current_time = time(NULL);
