@@ -283,15 +283,43 @@ void update_instruction_box(GtkWidget* vbox, struct Compiler* comp) {
 	GtkWidget* ibox = gtk_bin_get_child(GTK_BIN(gtk_bin_get_child(GTK_BIN(s_window))));
 	list = gtk_container_get_children(GTK_CONTAINER(ibox));
 	GtkWidget* label;
-	char buff[100];
+	char buff[500];
+	char instruction[100], format[100], op1[100], op2[100];
     
     	
 	for (int i = 0; i < comp -> command_len; i++) {
 		label = list->data;
-		if (i == comp -> command_pointer - 1)
-			sprintf(buff, "<span bgcolor='#00FF004F'><b>%d. %s</b></span>", i+1, comp -> command_list[i].line);
+				
+		sprintf(instruction, "<span color='#7000FF'>%s</span>", comp -> command_list[i].instruction);
+
+		switch (comp -> command_list[i].format) {
+			case 1:
+				sprintf(format, "<span color='#C0C000'>.b</span>");
+				break;
+			case 2:
+				sprintf(format, "<span color='#C0C000'>.w</span>");
+				break;
+			case 4:
+				sprintf(format, "<span color='#C0C000'>.l</span>");
+				break;
+			default:
+				sprintf(format, " ");
+				break;
+		}
+		if (comp -> command_list[i].source)
+			sprintf(op1, "<span color='#B00000'>%s</span>", comp -> command_list[i].source);
 		else
-			sprintf(buff, "<b>%d. %s</b>", i+1, comp -> command_list[i].line);
+			sprintf(op1, " ");
+		
+		if (comp -> command_list[i].destination)
+			sprintf(op2, "<span color='#B00000'>, %s</span>", comp -> command_list[i].destination);
+		else
+			sprintf(op2, " ");
+
+		if (i == comp -> command_pointer - 1)
+			sprintf(buff, "<span bgcolor='#00FF004F'><b>%d. %s%s %s %s</b></span>", i+1, instruction, format, op1, op2);
+		else
+			sprintf(buff, "<b>%d. %s%s %s %s</b>", i+1, instruction, format, op1, op2);
 		
 		gtk_label_set_markup(GTK_LABEL(label), buff);
 		list = list->next;

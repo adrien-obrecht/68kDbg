@@ -306,7 +306,7 @@ int find_label(struct Compiler* comp, char* label) {
 	char* l;
 
 	l = malloc(sizeof(char) * strlen(label + 2));
-	sprintf(l, "%s:\n", label);
+	sprintf(l, "%s:", label);
 	for (int i = 0; i < comp -> command_len; i++) {
 		if (strcmp(comp -> command_list[i].instruction, l) == 0) {
 			free(l);

@@ -10,6 +10,7 @@ void parse_line(char* line,char** op1, char** op2, char** format, char** instruc
 	char* cpy = malloc(sizeof(char) * (strlen(line) + 1));
 
 	strcpy(cpy, line);
+	cpy[strlen(line) - 1] = '\0';
 	command = strtok(cpy, " ");
 	if (!command) {
 		printf("No command was provided in %s\n", line);
